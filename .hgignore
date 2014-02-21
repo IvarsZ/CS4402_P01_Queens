@@ -1,0 +1,16 @@
+# use glob syntax.
+syntax: glob
+
+*.log
+*~
+*.pdf
+*.bbl
+*.aux
+*.gz
+*.blghg 
+*.blg
+*.info
+*.infor
+*.minion
+
+.vimrc
