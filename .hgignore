@@ -12,5 +12,8 @@ syntax: glob
 *.info
 *.infor
 *.minion
+*.jar
+*.solution
+savilerow
 
 .vimrc
