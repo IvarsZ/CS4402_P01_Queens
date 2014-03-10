@@ -1,0 +1,49 @@
+language ESSENCE' 1.0
+
+letting n be 10
+
+letting FIRST be 0
+letting LAST be n-1
+
+letting RANGE be domain int(FIRST..LAST)
+letting VALUES be domain int(0..1)
+letting LEFT_RANGE be domain int(-LAST..LAST)
+letting RIGHT_RANGE be domain int(FIRST..2*LAST)
+
+find board : matrix indexed by [RANGE, RANGE] of VALUES
+
+find numberOfQueens : int(1..n)
+  
+minimising numberOfQueens
+
+such that
+
+  numberOfQueens = sum([ board[row, column] | row : RANGE, column : RANGE ]),
+
+  $ all rows have at most one queen
+  forAll row : RANGE .
+    atmost(board[row, ..], [1], [1]),
+
+  $ all columns have at most one queen
+  forAll column : RANGE .
+    atmost(board[.., column], [1], [1]),
+
+  $ all diagonals have at most one queen
+  forAll column : LEFT_RANGE .
+    atmost([ board[offset, column + offset] | offset : RANGE, column + offset >= FIRST, column + offset <= LAST ], [1], [1]),
+
+  forAll column : RIGHT_RANGE .
+    atmost([ board[offset, column - offset] | offset : RANGE, column - offset >= FIRST, column - offset <= LAST ], [1], [1]),
+
+  $ all squares have at least one queen in its row, column or diagonal
+  forAll row : RANGE .
+    forAll column : RANGE .
+      atleast([ board[row + sign1 * offset, column + sign2 * offset] |
+                  sign1 : int(-1, 0, 1),
+                  sign2 : int(-1, 0, 1),
+                  offset : RANGE,
+                    row + sign1 * offset >= FIRST,
+                    row + sign1 * offset <= LAST,
+                    column + sign2 * offset >= FIRST,
+                    column + sign2 * offset <= LAST
+              ], [1], [1])

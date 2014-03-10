@@ -1,0 +1,46 @@
+language ESSENCE' 1.0
+
+letting n be 10
+
+letting FIRST be 0
+letting LAST be n-1
+letting NO_QUEEN be -1
+
+letting VALUES be domain int(NO_QUEEN..LAST)
+letting RANGE be domain int(FIRST..LAST)
+letting LEFT_RANGE be domain int(-LAST..LAST)
+letting RIGHT_RANGE be domain int(FIRST..2*LAST)
+
+find numberOfQueens : RANGE
+find queenColumns : matrix indexed by [RANGE] of VALUES 
+ 
+minimising numberOfQueens
+
+such that
+
+  numberOfQueens = sum([ queenColumns[queen] != NO_QUEEN | queen : RANGE ]),
+
+  $ Rows have at most one queen by default.
+
+  $ All columns have at most one queen.
+  forAll column : RANGE .
+    atmost([queenColumns[row] = column | row : RANGE ], [1], [1]),
+
+  $ all diagonals have at most one queen
+  forAll column : LEFT_RANGE .
+    atmost([ queenColumns[queen] = column + queen | queen : RANGE, column + queen != NO_QUEEN ], [1], [1]),
+
+  forAll column : RIGHT_RANGE .
+    atmost([ queenColumns[queen] = column - queen | queen : RANGE, column - queen != NO_QUEEN ], [1], [1]),
+
+  $ all squares have at least one queen in its row, column or diagonals
+  forAll row : RANGE .
+    forAll column : RANGE .
+      atleast([ queenColumns[row + sign1 * queen] = column + sign2 * queen |
+                  sign1 : int(-1..1),
+                  sign2 : int(-1..1),
+                  queen : RANGE,
+                    row + sign1 * queen >= FIRST,
+                    row + sign1 * queen <= LAST,
+                    column + sign2 * queen != NO_QUEEN
+              ], [1], [1]) 
