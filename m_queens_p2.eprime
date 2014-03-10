@@ -1,6 +1,6 @@
 language ESSENCE' 1.0
 
-letting n be 10
+given n : int(1..)
 
 letting FIRST be 0
 letting LAST be n-1
@@ -37,10 +37,10 @@ such that
   forAll row : RANGE .
     forAll column : RANGE .
       atleast([ queenColumns[row + sign1 * queen] = column + sign2 * queen |
-                  sign1 : int(-1..1),
-                  sign2 : int(-1..1),
+                  sign1 : int(0, -1, 1),
+                  sign2 : int(0, -1, 1),
                   queen : RANGE,
                     row + sign1 * queen >= FIRST,
                     row + sign1 * queen <= LAST,
                     column + sign2 * queen != NO_QUEEN
-              ], [1], [1]) 
+              ], [1], [1])
