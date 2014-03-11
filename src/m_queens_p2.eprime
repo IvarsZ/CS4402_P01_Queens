@@ -8,6 +8,8 @@ letting NO_QUEEN be -1
 
 letting VALUES be domain int(NO_QUEEN..LAST)
 letting RANGE be domain int(FIRST..LAST)
+
+$ Ranges for slicing columns
 letting LEFT_RANGE be domain int(-LAST..LAST)
 letting RIGHT_RANGE be domain int(FIRST..2*LAST)
 
@@ -26,17 +28,18 @@ such that
   forAll column : RANGE .
     atmost([queenColumns[row] = column | row : RANGE ], [1], [1]),
 
-  $ all diagonals have at most one queen
+  $ All diagonals have at most one queen, use the same offset for row and column coordinates and make sure they're in the range to get diagonals.
   forAll column : LEFT_RANGE .
-    atmost([ queenColumns[queen] = column + queen | queen : RANGE, column + queen >= FIRST, column + queen <= LAST ], [1], [1]),
+    atmost([ queenColumns[queen] - queen = column | queen : RANGE, column + queen >= FIRST, column + queen <= LAST ], [1], [1]),
 
   forAll column : RIGHT_RANGE .
-    atmost([ queenColumns[queen] = column - queen | queen : RANGE, column - queen >= FIRST, column - queen <= LAST ], [1], [1]),
+    atmost([ queenColumns[queen] + queen = column | queen : RANGE, column - queen >= FIRST, column - queen <= LAST ], [1], [1]),
 
-  $ all squares have at least one queen in its row, column or diagonal
+  $ All squares have at least one queen in its row, column or diagonal.
+  $ Use all possible sign combinations when adding offset to row and column coordinates to get row, column and diagonals.
   forAll row : RANGE .
     forAll column : RANGE .
-      sum([ queenColumns[row + sign1 * queen] = column + sign2 * queen |
+      atleast([ queenColumns[row + sign1 * queen] - sign2 * queen = column |
                   sign1 : int(-1, 0, 1),
                   sign2 : int(-1, 0, 1),
                   queen : RANGE,
@@ -45,5 +48,5 @@ such that
                     column + sign2 * queen >= FIRST,
                     column + sign2 * queen <= LAST,
                     queen != FIRST,
-                    sign1 != 0 \/ sign2 != 0 \/ queen = LAST
-              ]) >= 1
+                    sign1 != 0 \/ sign2 != 0 \/ queen = LAST $ add the [row, column] only once.
+              ], [1], [1])

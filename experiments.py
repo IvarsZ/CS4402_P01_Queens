@@ -64,6 +64,7 @@ def compare_sum_atleast_exists_for_p1():
 
 def compare_sum_atleast_exists_explicit_for_p2():
   for m in range(5, 13):
-    for part in ['p2_explicit', 'p2_sum', 'p2_atleast', 'p2_exists']:
+    #for part in ['p2_explicit', 'p2_sum', 'p2_atleast', 'p2_exists']:
+    for part in ['p2']:
       run_experiment(part, m, 1)
 compare_sum_atleast_exists_explicit_for_p2()

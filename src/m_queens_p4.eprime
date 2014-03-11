@@ -7,6 +7,8 @@ letting LAST be n-1
 
 letting RANGE be domain int(FIRST..LAST)
 letting VALUES be domain int(0..1)
+
+$ Ranges for slicing columns
 letting LEFT_RANGE be domain int(-LAST..LAST)
 letting RIGHT_RANGE be domain int(FIRST..2*LAST)
 
@@ -19,6 +21,9 @@ such that
 
   numberOfQueens = sum([ board[row, column] | row : RANGE, column : RANGE ]),
   
+  $ Take all possible symmetries of the board, and restrict the solution to the lexicographically smallest one.
+  $ To produce symmetries of the board apply anti-clockwise rotation (a = [r,c] -> [c, n - r]) and horizontal flip (b = [r,c] -> [n - r, c])
+  $ in all combinations (elements of dihedral group D_8).
   [ board[row, column] | row : RANGE, column : RANGE] <=lex [ board[       column, LAST - row   ] | row : RANGE, column : RANGE], $ a
   [ board[row, column] | row : RANGE, column : RANGE] <=lex [ board[LAST - row   , LAST - column] | row : RANGE, column : RANGE], $ a^2
   [ board[row, column] | row : RANGE, column : RANGE] <=lex [ board[LAST - column,        row   ] | row : RANGE, column : RANGE], $ a^3
@@ -27,22 +32,23 @@ such that
   [ board[row, column] | row : RANGE, column : RANGE] <=lex [ board[       row   , LAST - column] | row : RANGE, column : RANGE], $ a^2*b
   [ board[row, column] | row : RANGE, column : RANGE] <=lex [ board[       column,        row   ] | row : RANGE, column : RANGE], $ a^3*b
 
-  $ all rows have at most one queen
+  $ All rows have at most one queen.
   forAll row : RANGE .
     atmost(board[row, ..], [1], [1]),
 
-  $ all columns have at most one queen
+  $ All columns have at most one queen.
   forAll column : RANGE .
     atmost(board[.., column], [1], [1]),
 
-  $ all diagonals have at most one queen
+  $ All diagonals have at most one queen, use the same offset for row and column coordinates and make sure they're in the range to get diagonals.
   forAll column : LEFT_RANGE .
     atmost([ board[offset, column + offset] | offset : RANGE, column + offset >= FIRST, column + offset <= LAST ], [1], [1]),
 
   forAll column : RIGHT_RANGE .
     atmost([ board[offset, column - offset] | offset : RANGE, column - offset >= FIRST, column - offset <= LAST ], [1], [1]),
 
-  $ all squares have at least one queen in its row, column or diagonal
+  $ All squares have at least one queen in its row, column or diagonal.
+  $ Use all possible sign combinations when adding offset to row and column coordinates to get row, column and diagonals.
   forAll row : RANGE .
     forAll column : RANGE .
       atleast([ board[row + sign1 * offset, column + sign2 * offset] |
@@ -54,5 +60,5 @@ such that
                     column + sign2 * offset >= FIRST,
                     column + sign2 * offset <= LAST,
                     offset != FIRST,
-                    sign1 != 0 \/ sign2 != 0 \/ offset = LAST
+                    sign1 != 0 \/ sign2 != 0 \/ offset = LAST $ add the [row, column] only once.
               ], [1], [1])
