@@ -15,5 +15,6 @@ syntax: glob
 *.jar
 *.solution
 savilerow
+solutions/*
 
 .vimrc

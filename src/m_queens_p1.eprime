@@ -40,10 +40,11 @@ such that
       atleast([ board[row + sign1 * offset, column + sign2 * offset] |
                   sign1 : int(-1, 0, 1),
                   sign2 : int(-1, 0, 1),
-                  offset : int(FIRST + 1..LAST),
+                  offset : RANGE,
                     row + sign1 * offset >= FIRST,
                     row + sign1 * offset <= LAST,
                     column + sign2 * offset >= FIRST,
                     column + sign2 * offset <= LAST,
+                    offset != FIRST,
                     sign1 != 0 \/ sign2 != 0 \/ offset = LAST
               ], [1], [1])
