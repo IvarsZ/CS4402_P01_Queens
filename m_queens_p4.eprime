@@ -10,11 +10,8 @@ letting VALUES be domain int(0..1)
 letting LEFT_RANGE be domain int(-LAST..LAST)
 letting RIGHT_RANGE be domain int(FIRST..2*LAST)
 
-find board : matrix indexed by [RANGE, RANGE] of VALUES
-
 find numberOfQueens : int(1..n)
-
-branching on numberOfQueens
+find board : matrix indexed by [RANGE, RANGE] of VALUES
   
 minimising numberOfQueens
 

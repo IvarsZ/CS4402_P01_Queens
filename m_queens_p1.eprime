@@ -10,11 +10,8 @@ letting VALUES be domain int(0..1)
 letting LEFT_RANGE be domain int(-LAST..LAST)
 letting RIGHT_RANGE be domain int(FIRST..2*LAST)
 
-find board : matrix indexed by [RANGE, RANGE] of VALUES
-
 find numberOfQueens : int(1..n)
-
-heuristic conflict
+find board : matrix indexed by [RANGE, RANGE] of VALUES
   
 minimising numberOfQueens
 
@@ -43,9 +40,10 @@ such that
       atleast([ board[row + sign1 * offset, column + sign2 * offset] |
                   sign1 : int(-1, 0, 1),
                   sign2 : int(-1, 0, 1),
-                  offset : RANGE,
+                  offset : int(FIRST + 1..LAST),
                     row + sign1 * offset >= FIRST,
                     row + sign1 * offset <= LAST,
                     column + sign2 * offset >= FIRST,
-                    column + sign2 * offset <= LAST
+                    column + sign2 * offset <= LAST,
+                    sign1 != 0 \/ sign2 != 0 \/ offset = LAST
               ], [1], [1])
