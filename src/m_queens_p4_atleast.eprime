@@ -20,6 +20,17 @@ minimising numberOfQueens
 such that
 
   numberOfQueens = sum([ board[row, column] | row : RANGE, column : RANGE ]),
+  
+  $ Take all possible symmetries of the board, and restrict the solution to the lexicographically smallest one.
+  $ To produce symmetries of the board apply anti-clockwise rotation (a = [r,c] -> [c, n - r]) and horizontal flip (b = [r,c] -> [n - r, c])
+  $ in all combinations (elements of dihedral group D_8).
+  [ board[row, column] | row : RANGE, column : RANGE] <=lex [ board[       column, LAST - row   ] | row : RANGE, column : RANGE], $ a
+  [ board[row, column] | row : RANGE, column : RANGE] <=lex [ board[LAST - row   , LAST - column] | row : RANGE, column : RANGE], $ a^2
+  [ board[row, column] | row : RANGE, column : RANGE] <=lex [ board[LAST - column,        row   ] | row : RANGE, column : RANGE], $ a^3
+  [ board[row, column] | row : RANGE, column : RANGE] <=lex [ board[LAST - row   ,        column] | row : RANGE, column : RANGE], $ b
+  [ board[row, column] | row : RANGE, column : RANGE] <=lex [ board[LAST - column, LAST - row   ] | row : RANGE, column : RANGE], $ a*b
+  [ board[row, column] | row : RANGE, column : RANGE] <=lex [ board[       row   , LAST - column] | row : RANGE, column : RANGE], $ a^2*b
+  [ board[row, column] | row : RANGE, column : RANGE] <=lex [ board[       column,        row   ] | row : RANGE, column : RANGE], $ a^3*b
 
   $ All rows have at most one queen.
   forAll row : RANGE .

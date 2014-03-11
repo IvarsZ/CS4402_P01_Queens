@@ -14,6 +14,8 @@ letting RIGHT_RANGE be domain int(FIRST..2*LAST)
 
 find numberOfQueens : int(1..m)
 find board : matrix indexed by [RANGE, RANGE] of VALUES
+
+heuristic srf
   
 minimising numberOfQueens
 
@@ -40,13 +42,14 @@ such that
   $ Use all possible sign combinations when adding offset to row and column coordinates to get row, column and diagonals.
   forAll row : RANGE .
     forAll column : RANGE .
-      exists offset : RANGE .
-        exists sign1 : int(-1, 0, 1) .
-          exists sign2 : int(-1, 0, 1) .
-            row + sign1 * offset >= FIRST /\
-            row + sign1 * offset <= LAST /\
-            column + sign2 * offset >= FIRST /\
-            column + sign2 * offset <= LAST /\
-            offset != FIRST /\
-            (sign1 != 0 \/ sign2 != 0 \/ offset = LAST) /\ $ add the [row, column] only once.
-            board[row + sign1 * offset, column + sign2 * offset] = 1
+      atleast([ board[row + sign1 * offset, column + sign2 * offset] |
+                  sign1 : int(-1, 0, 1),
+                  sign2 : int(-1, 0, 1),
+                  offset : RANGE,
+                    row + sign1 * offset >= FIRST,
+                    row + sign1 * offset <= LAST,
+                    column + sign2 * offset >= FIRST,
+                    column + sign2 * offset <= LAST,
+                    offset != FIRST,
+                    sign1 != 0 \/ sign2 != 0 \/ offset = LAST $ add the [row, column] only once.
+              ], [1], [1])

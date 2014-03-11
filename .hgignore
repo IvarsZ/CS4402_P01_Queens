@@ -16,5 +16,10 @@ syntax: glob
 *.solution
 savilerow
 solutions/*
+.MINION*
+.Rhistory
+test
+*.txt
+*.swp
 
 .vimrc

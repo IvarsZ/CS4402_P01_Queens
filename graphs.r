@@ -42,18 +42,20 @@ plot_parts_time <- function(p_range, name, x_max, y_max) {
 # Plot different p1 implementations.
 plot_parts_time(c('p1_atleast', 'p1_sum', 'p1_exists'), "Different p1 implementations", 13, 1000)
 
-plot(zero, zero, xlab="m", ylab="Time, s", log="y", main="Solving time for different parts", pch=p, xlim=c(0, 13), ylim=c(0.001, 200), yaxt="n")
-for (c in c_range) {
-  p_set <- subset(q, q$part == p_range[c])
-  lines(p_set$m, p_set$time, col=c)
-  points(p_set$m, p_set$time, col=c)
-}
-legend("topleft", title="parts", legend=p_range, col=c_range, cex=0.5, pch=1)
-aty <- axTicks(2)
-labels <- sapply(aty,function(i)
-  as.expression(bquote(.(i)))
-)
-axis(2,at=aty,labels=labels)
+# Plot different p2 implementations.
+plot_parts_time(c('p2_atleast', 'p2_sum', 'p2_exists', 'p2_explicit'), "Different p2 implementations", 12, 1000)
+
+# Plot different p1 heuristics.
+plot_parts_time(c('p1_atleast', 'p1_static', 'p1_sdf', 'p1_conflict', 'p1_srf'), "Different p1 heuristics", 13, 1000)
+
+# Plot different p2 heuristics.
+plot_parts_time(c('p2_sum', 'p2_static', 'p2_sdf', 'p2_conflict', 'p2_srf'), "Different p2 heuristics", 13, 1000)
+
+# Plot different p4 heuristics.
+plot_parts_time(c('p4_sum', 'p4_static', 'p4_sdf', 'p4_conflict', 'p4_srf'), "Different p4 heuristics", 13, 1000)
+
+# Plot different parts (best for each)
+plot_parts_time(c('p1_sdf', 'p2_conflict', 'p4_sdf'), "Best of each part", 13, 1000)
 
 plot(zero, zero, xlab="m", ylab="Nodes, no.", log="y", main="Nodes", pch=p, xlim=c(0, 13), ylim=c(1, 100000000), yaxt="n")
 for (c in c_range) {
