@@ -28,19 +28,22 @@ such that
 
   $ all diagonals have at most one queen
   forAll column : LEFT_RANGE .
-    atmost([ queenColumns[queen] = column + queen | queen : RANGE, column + queen != NO_QUEEN ], [1], [1]),
+    atmost([ queenColumns[queen] = column + queen | queen : RANGE, column + queen >= FIRST, column + queen <= LAST ], [1], [1]),
 
   forAll column : RIGHT_RANGE .
-    atmost([ queenColumns[queen] = column - queen | queen : RANGE, column - queen != NO_QUEEN ], [1], [1]),
+    atmost([ queenColumns[queen] = column - queen | queen : RANGE, column - queen >= FIRST, column - queen <= LAST ], [1], [1]),
 
-  $ all squares have at least one queen in its row, column or diagonals
+  $ all squares have at least one queen in its row, column or diagonal
   forAll row : RANGE .
     forAll column : RANGE .
-      atleast([ queenColumns[row + sign1 * queen] = column + sign2 * queen |
-                  sign1 : int(0, -1, 1),
-                  sign2 : int(0, -1, 1),
+      sum([ queenColumns[row + sign1 * queen] = column + sign2 * queen |
+                  sign1 : int(-1, 0, 1),
+                  sign2 : int(-1, 0, 1),
                   queen : RANGE,
                     row + sign1 * queen >= FIRST,
                     row + sign1 * queen <= LAST,
-                    column + sign2 * queen != NO_QUEEN
-              ], [1], [1])
+                    column + sign2 * queen >= FIRST,
+                    column + sign2 * queen <= LAST,
+                    queen != FIRST,
+                    sign1 != 0 \/ sign2 != 0 \/ queen = LAST
+              ]) >= 1

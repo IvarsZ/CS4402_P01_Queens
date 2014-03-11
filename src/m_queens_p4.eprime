@@ -52,5 +52,7 @@ such that
                     row + sign1 * offset >= FIRST,
                     row + sign1 * offset <= LAST,
                     column + sign2 * offset >= FIRST,
-                    column + sign2 * offset <= LAST
+                    column + sign2 * offset <= LAST,
+                    offset != FIRST,
+                    sign1 != 0 \/ sign2 != 0 \/ offset = LAST
               ], [1], [1])

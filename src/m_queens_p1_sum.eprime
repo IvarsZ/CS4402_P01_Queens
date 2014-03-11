@@ -23,24 +23,24 @@ such that
 
   $ All rows have at most one queen.
   forAll row : RANGE .
-    atmost(board[row, ..], [1], [1]),
+    sum(board[row, ..]) <= 1,
 
   $ All columns have at most one queen.
   forAll column : RANGE .
-    atmost(board[.., column], [1], [1]),
+    sum(board[.., column]) <= 1,
 
   $ All diagonals have at most one queen, use the same offset for row and column coordinates and make sure they're in the range to get diagonals.
   forAll column : LEFT_RANGE .
-    atmost([ board[offset, column + offset] | offset : RANGE, column + offset >= FIRST, column + offset <= LAST ], [1], [1]),
+    sum([ board[offset, column + offset] | offset : RANGE, column + offset >= FIRST, column + offset <= LAST ]) <= 1,
 
   forAll column : RIGHT_RANGE .
-    atmost([ board[offset, column - offset] | offset : RANGE, column - offset >= FIRST, column - offset <= LAST ], [1], [1]),
+    sum([ board[offset, column - offset] | offset : RANGE, column - offset >= FIRST, column - offset <= LAST ]) <= 1,
 
   $ All squares have at least one queen in its row, column or diagonal.
   $ Use all possible sign combinations when adding offset to row and column coordinates to get row, column and diagonals.
   forAll row : RANGE .
     forAll column : RANGE .
-      atleast([ board[row + sign1 * offset, column + sign2 * offset] |
+      sum([ board[row + sign1 * offset, column + sign2 * offset] |
                   sign1 : int(-1, 0, 1),
                   sign2 : int(-1, 0, 1),
                   offset : RANGE,
@@ -50,4 +50,4 @@ such that
                     column + sign2 * offset <= LAST,
                     offset != FIRST,
                     sign1 != 0 \/ sign2 != 0 \/ offset = LAST $ add the [row, column] only once.
-              ], [1], [1])
+              ]) >= 1
