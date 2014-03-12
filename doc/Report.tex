@@ -1,0 +1,150 @@
+\documentclass{article}
+
+\usepackage{fixltx2e}
+\usepackage{fullpage}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+
+\title{Practical 1: Modeling m-queens problem}
+\author{100014525}
+\date{March 2014}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+The m-queens problem is placing the minimal number of queens on an m x m chess board such that
+\begin{itemize}
+	\item no pair of queens attack each other
+	\item every empty square on the chess board is attacked by some queen
+\end{itemize}
+
+\subsection{How to run}
+\begin{description}
+	\item[solve a model] ./savilerow -in-eprime src/m\_queens\_p1\_sdf.eprime -params "letting m be 10" -run-minion minion
+	\item[run experiments] python experiments.py
+\end{description}
+
+\section{Model design}
+\subsection{Part 1}
+
+In part 1 the board is represented with a m x m matrix of zeroes and ones. A queen is in a square if and only if the value of board matrix at that position is 1.
+
+For no pair of queens to attack each other all rows, columns and diagonals must have at most one queen in them. The rows, columns and diagonals are extracted from the board matrix using matrix comprehension, then the sum or at most function is used to restrict the number of queens to at most 1.
+
+To extract the \textbackslash \space diagonals "extend" the board to the left by m - 1 columns to capture those diagonals starting below the first row. Similarly for / diagonals "extend" the board to the right by m - 1. Now for each square of the first row go down by one row and to the right by one column until out of the board to get the \textbackslash \space diagonals. Similarly go down and left for the / diagonals.
+
+For every square to be attacked by some queen its row, column or one of its diagonals must have at least one queen. All the squares in the same row, column or diagonal (including itself) are extracted using matrix comprehension, then the sum or at least function is used to ensure that there is at least one queen between them.
+
+To get all such squares add/substract an offset value to row and/or column of the starting square. The matrix comprehension would look like this:
+\begin{equation}board[row + sign1*offset, column + sign2*offset]\end{equation},
+where $sign2 ,sign1 \in \{-1,0,1\}$ and  and $offset\in(1..m-1)$ with additional constraints ensuring that the resulting square is still inside the board. This comprehension is a bit inefficient since the original square is included multiple times when $sign1 = sign2 = 0$. To eliminate that, but keep the original square,
+ add extra condition stating that
+\begin{equation}sign1 != 0 \lor sign2 != 0 \lor offset = 1\end{equation}
+
+Alternatively exists statement reusing the conditions from matrix comprehension approach can be used. The model using atleast/atmost is in $m\_queens\_p1\_atleast.eprime$ file. The sum model is in \newline $m\_queens\_p1\_sum.eprime$ and exists model is in  $m\_queens\_p1\_exists.eprime$.
+
+\subsection{Part 2}
+
+In part 2 the board is represented with a vector of length m storing the position of the queen for each row or a dummy value if there is no queen in that row. The constraint model from part 1 can be reused since \begin{equation}
+board[row, column] = 1 \Leftrightarrow queenColumns[row] = column\end{equation}
+With the exception that the constraint of at most one queen per row is always satisfied, so there is no need to check that.
+
+Alternatively one can use more direct approach for the part 2 model. To ensure that no two queens are in the same column all the values in queenColumns have to be distinct with the exception of the dummy value. A square $[row, column]$ is in the same diagonal as a queen on row q if and only if \begin{equation}|row - q| = |queenColumns[q] - column|,\end{equation} i.e. the column and row distances are equal. So for no two queens to be on the same diagonal apply this constraint to all pairs of queens. This can be optimized a bit by comparing a queen only to the ones below it.
+
+To ensure that every square is attacked we need to only consider the rows that don't have a queen, i.e. the value of queenColumns[row] is the dummy value. Then for each square $[row, column]$ of that row there has to exist another row q such that $queenColumns[q] = column$ (same column) or $|queenColumns[q] - column| = |q - row|$ (same diagonal).
+
+The models similar to part 1 are in $m\_queens\_p2\_atleast.eprime$ $m\_queens\_p2\_sum.eprime$, \newline $m\_queens\_p2\_exists.eprime$ files, while the more explicit part 2 model is in $m\_queens\_p2\_explicit.eprime$ file.
+
+One would expect the models of part 2 to be faster, since it has m variables with $m+1$ possible values for $(m+1)^m$ total possibilities, while models of part 1 have $m^2$ variables of 2 possible values for $2^{m^2}$ total possibilities, which grows much faster. Moreover in part 1 the board can have more than m queens, which clearly violates the constraints while in part 2 no variable assignment will yield more than m queens.
+
+\subsection{Part 4}
+
+To improve the running time of the minion solver and find solutions only up to symmetry the occurrence model of part 1 was extended. A chess board of queens has symmetries of a square which are 4 rotations and 4 reflections represented by the Dihedral group $D_8=\{a, a^2, a^3, a^4, ab, a^2b, a^3b, a^4b\}$ where $a$ is a rotation by $90^\circ$ anti-clockwise and $b$ is a horizontal reflection, defined by $a[row, column]=a[column, m - row]$ and $b[row, column]=b[m - row, column]$. Which represents the variable symmetries of this model, note that this model does not have a value symmetry.
+
+Now to break symmetry we want to pick only one solution of these 8 symmetries. Note that for some solutions some symmetries can be equal. To pick one solution generate all symmetries using matrix comprehension and add constraints forcing the solution to be the lexicographically smallest when compared to all its symmetries.
+
+\subsection{Testing}
+
+To check correctness of the models the solutions were checked for m=4 and m=5 by hand, and the number of queens required  for larger m was compared to other student's answers.
+
+\section{Experiments}
+
+A set of experiments was run to compare the models for different implementations, heuristics and varying m values. The experiments were run using a python script in the experiments.py file.
+
+The run\_experiment function in the script runs savilerow some number of times for a given model and m value, reads the solution file and writes the total time, number of queens and number of nodes to a separate results.txt file. It is used in other functions that compare the different models, implementations and heuristics.
+
+The find\_number\_of\_solutions function runs savilerow for a given model and m value with the -all-solutions flag, goes trough all solutions and counts the number of solutions with specific number of queens. It is used to find the number of solutions for the different models.
+
+All experiments were run on the same otherwise unused lab machine one after another to improve the consistency of the results. Moreover all the necessary files are provided to enable repeating the experiments or adding extra measurements.
+
+Then R was used to process the results and plot graphs, the used R code is in the graphs.r file.
+
+\subsection{Part 1 implementation}
+
+To pick the best implementation from sum, at least and exists for part 1 the total minion time was measured for m from 5 to 12, because for other values it either is too quick to measure or takes too long.
+
+\includegraphics[width=\textwidth]{p1_impl_plot}
+
+The sum and at least implementations were much quicker than exists. While the performance of sum and at least is similar, the at least implementation is always a bit faster. The graph shows that this trend should continue. So for part 1 the at least implementation is the best. This could be explained by the solver often performing better with a global constraint (sum, at least) compared to a set of simpler constraints (using exists). Taking a look at the corresponding minion files for the models confirms that, since the files for the sum and at least are simpler and contain no auxiliary variables and less constraints when compared to the exists minion file.
+
+\subsection{Part 1 heuristics}
+
+The at least model, as it is the fastest, was tested under all possible heuristics - no heuristic, static, sdf, conflict, and srf using the corresponding model files $m\_queens\_p1\_atleast.eprime$, $m\_queens\_p1\_static.eprime$, $m\_queens\_p1\_sdf.eprime$, $m\_queens\_p1\_conflict.eprime$, $m\_queens\_p1\_srf.eprime$. The m values used where from 5 to 12.
+
+\includegraphics[width=\textwidth]{p1_h_plot}
+
+All the heuristics perform very similarly with a slight edge to sdf (smallest domain first). For m is 12 it takes 53 seconds, while the second fastest is conflict with 60 seconds. Branching on was not tested, since using branching on can cause maximising and minimising to function in an unusual way.
+
+\subsection{Part 2 implementation}
+
+To pick the best implementation from sum, at least and exists for part 1 the total minion time was measured for m from 5 to 11.
+
+\includegraphics[width=\textwidth]{p2_impl_plot}
+
+The sum and at least implementations were much quicker than exists and explicit. While the performance of sum and at least is similar. The sum implementation this time is always a bit faster. The graph shows that this trend should continue. So for part 2 the sum implementation is the best. Surprisingly the explicit model is the slowest. This can be explained by the same arguments as in part 1 - the minion file for the explicit implementation is even more complicated than exists file.
+
+\subsection{Part 2 heuristics}
+
+The sum model, as it is the fastest, was tested under all possible heuristics - no heuristic, static, sdf, conflict, and srf using the corresponding model files $m\_queens\_p2\_sum.eprime$, $m\_queens\_p2\_static.eprime$, $m\_queens\_p2\_sdf.eprime$, $m\_queens\_p2\_conflict.eprime$, $m\_queens\_p2\_srf.eprime$. The m values used where from 5 to 12.
+
+\includegraphics[width=\textwidth]{p2_h_plot}
+
+All the heuristics perform very similarly except conflict which is noticeably faster. For m is 12 it takes 65 seconds, while the second fastest is sum with 124 seconds.
+
+\subsection{Part 4 heuristics}
+
+For this part the at least model, as it was the fastest, from p1 was used with the addition of symmetry breaking constraints. It was tested under all possible heuristics - no heuristic, static, sdf, conflict, and srf using the corresponding model files $m\_queens\_p4\_atleast.eprime$, $m\_queens\_p4\_static.eprime$, $m\_queens\_p4\_sdf.eprime$, $m\_queens\_p4\_conflict.eprime$, $m\_queens\_p4\_srf.eprime$. The m values used where from 5 to 12.
+
+\includegraphics[width=\textwidth]{p4_h_plot}
+
+Again the sdf heuristic is the fastest, but not by much. For m is 12 it takes 11 seconds, while the second fastest is static with 15 seconds.
+
+\subsection{Comparing parts}
+
+Now that we've found the best model and heuristic for each part we can compare them. The compared models are at least with sdf for part 1, sum with conflict for part 2 and at least with sdf for part 4.
+
+For these experiments each run is repeated multiple times for smaller m values 25 times and 5 times for larger m to get precise measurements. Then the mean running time is calculated together with standard deviance, absolute and relative error with 95 percent confidence interval. The processed results can be found in the results.csv file. For m values after 6, the relative error of time measurements is negligible - below 0.5 percent.
+
+\subsubsection{Running time for each part}
+\includegraphics[width=\textwidth]{compare_parts_plot}
+
+From the graph one can see that part 4 is couple of times quicker, which can be explained by smaller search space due to avoiding symmetry. Then part 1 is quicker than part 2, but the graph seems to indicate that for larger m values part 2 would become quicker, as its average time is growing slower. Part 2 scaling better than part 1 could be explained due to search space growing slower and some constraints being implicitly satisfied.
+
+\subsubsection{Number of nodes}
+\includegraphics[width=\textwidth]{nodes_plot}
+
+The number of explored minion nodes graph confirms the above hypthosis - the number of nodes for part 2 grows slower than for part1.
+
+\subsubsection{Number of solutions}
+\includegraphics[width=\textwidth]{solutions_plot}
+
+As one would expect the number of solutions for parts 1 and parts 2 is the same, while part 4 has almost 8 times less solutions, due to eliminated at most 8 eliminated symmetries. Moreover while the number of solutions is overall increasing, it is happening step wise. Since multiple m values have the same number of queens and so for larger m values the queens have to cover more space and thus their placement is more restricted.
+
+\subsection{Number of queens}
+\includegraphics[width=\textwidth]{queens_plot}
+
+Interestingly the same number of queens works for quite a wide range of m values. For example if $m\in\{8, 9, 10, 11\}$ only 5 queens are needed. Moreover, 6 queens is never the optimal solution, since m=12 case already requires 7 queens.
+
+\end{document}
