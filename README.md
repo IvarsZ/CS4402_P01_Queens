@@ -1,0 +1,1 @@
+Constraint model for the m queens problem in Minion. The m-queens problem is finding and placing the minimal number of queens on an m*m chess board such that no pair of queens attack each other and every empty square on the chess board is attacked by some queen.
